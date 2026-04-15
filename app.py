@@ -1,6 +1,6 @@
 """
 ╔══════════════════════════════════════════════════════════════════╗
-║              S.S_AI Summarizer — Premium SaaS UI                ║
+║              S.S_AI Summarizer — Enterprise Dark UI             ║
 ║         Built with Streamlit + HuggingFace Transformers          ║
 ╚══════════════════════════════════════════════════════════════════╝
 """
@@ -21,50 +21,66 @@ st.set_page_config(
 )
 
 # ══════════════════════════════════════════════════════
-# 2. GLOBAL CSS — Dark Glass SaaS Design System
+# 2. GLOBAL CSS — Enterprise Dark Design System
 # ══════════════════════════════════════════════════════
 CUSTOM_CSS = """
 <style>
 /* ── Google Fonts ── */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
 /* ── CSS Variables ── */
 :root {
-  --bg-base:        #080c14;
-  --bg-surface:     #0d1321;
-  --bg-glass:       rgba(255,255,255,0.035);
-  --bg-glass-hover: rgba(255,255,255,0.065);
-  --border-subtle:  rgba(255,255,255,0.07);
-  --border-glow:    rgba(99,179,237,0.35);
+  /* Backgrounds — deep slate layers, not pure black */
+  --bg-base:        #0a0e17;
+  --bg-surface:     #0f1420;
+  --bg-raised:      #141928;
+  --bg-overlay:     #1a2133;
+  --bg-hover:       rgba(255,255,255,0.04);
 
-  --neon-blue:      #63b3ed;
-  --neon-purple:    #b794f4;
-  --neon-cyan:      #4fd1c5;
-  --glow-blue:      rgba(99,179,237,0.25);
-  --glow-purple:    rgba(183,148,244,0.25);
+  /* Borders */
+  --border-faint:   rgba(255,255,255,0.06);
+  --border-subtle:  rgba(255,255,255,0.10);
+  --border-accent:  rgba(56,189,248,0.40);
 
-  --grad-primary:   linear-gradient(135deg, #63b3ed 0%, #b794f4 100%);
-  --grad-subtle:    linear-gradient(135deg, rgba(99,179,237,0.15) 0%, rgba(183,148,244,0.15) 100%);
+  /* Accent — single electric blue, no competing hues */
+  --accent:         #38bdf8;
+  --accent-dim:     rgba(56,189,248,0.15);
+  --accent-glow:    rgba(56,189,248,0.20);
+  --accent-dark:    #0ea5e9;
 
-  --text-primary:   #e8edf5;
-  --text-secondary: #8a95a8;
-  --text-muted:     #4a5568;
+  /* Text hierarchy — four clear levels */
+  --text-primary:   #f0f4fb;
+  --text-secondary: #8b96ab;
+  --text-muted:     #4c5668;
+  --text-disabled:  #2e3647;
 
-  --font-display:   'Syne', sans-serif;
-  --font-body:      'Space Grotesk', sans-serif;
+  /* Semantic */
+  --success:        #34d399;
+  --success-dim:    rgba(52,211,153,0.12);
+  --error:          #f87171;
+  --error-dim:      rgba(248,113,113,0.10);
+  --warning:        #fbbf24;
 
-  --radius-sm:      8px;
-  --radius-md:      14px;
-  --radius-lg:      22px;
-  --radius-xl:      32px;
+  /* Fonts */
+  --font-display:   'Outfit', sans-serif;
+  --font-body:      'DM Sans', sans-serif;
+  --font-mono:      'DM Mono', monospace;
 
-  --shadow-glow-blue:   0 0 40px rgba(99,179,237,0.18);
-  --shadow-glow-purple: 0 0 40px rgba(183,148,244,0.18);
-  --shadow-card:        0 8px 40px rgba(0,0,0,0.55);
+  /* Radii */
+  --r-sm:  6px;
+  --r-md:  10px;
+  --r-lg:  16px;
+  --r-xl:  22px;
+
+  /* Shadows */
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md:  0 4px 20px rgba(0,0,0,0.5);
+  --shadow-lg:  0 8px 40px rgba(0,0,0,0.6);
+  --shadow-accent: 0 0 32px rgba(56,189,248,0.12);
 }
 
 /* ── Base Reset ── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; }
 
 html, body, [data-testid="stAppViewContainer"] {
   background: var(--bg-base) !important;
@@ -72,477 +88,726 @@ html, body, [data-testid="stAppViewContainer"] {
   color: var(--text-primary) !important;
 }
 
-/* Remove default Streamlit chrome */
-#MainMenu, footer, header { display: none !important; }
+/* Remove Streamlit chrome */
+#MainMenu, footer { display: none !important; }
 [data-testid="stDecoration"] { display: none !important; }
 
 /* ── Scrollbar ── */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--bg-base); }
-::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 99px; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-/* ── Main container width ── */
+/* ── Main container ── */
 [data-testid="stAppViewContainer"] > .main > .block-container {
-  max-width: 920px !important;
-  padding: 2rem 2rem 4rem !important;
+  max-width: 900px !important;
+  padding: 2.5rem 2rem 5rem !important;
   margin: 0 auto !important;
 }
 
-/* ════════════════════════════
+/* ══════════════════════════════════
+   SIDEBAR TOGGLE — HIGHLY VISIBLE
+══════════════════════════════════ */
+
+/* The collapsed-state arrow (when sidebar is hidden) */
+[data-testid="collapsedControl"] {
+  background: var(--bg-raised) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--r-md) !important;
+  color: var(--accent) !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: var(--shadow-sm), 0 0 12px var(--accent-glow) !important;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s !important;
+  opacity: 1 !important;
+}
+[data-testid="collapsedControl"]:hover {
+  background: var(--bg-overlay) !important;
+  border-color: var(--accent) !important;
+  box-shadow: var(--shadow-md), 0 0 20px var(--accent-glow) !important;
+}
+[data-testid="collapsedControl"] svg {
+  fill: var(--accent) !important;
+  stroke: var(--accent) !important;
+  color: var(--accent) !important;
+  opacity: 1 !important;
+}
+
+/* Sidebar expand/collapse button inside sidebar */
+[data-testid="stSidebarCollapseButton"] > button,
+button[data-testid="stSidebarCollapseButton"],
+[data-testid="stSidebar"] button[kind="header"] {
+  background: var(--bg-overlay) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--r-md) !important;
+  color: var(--accent) !important;
+  opacity: 1 !important;
+  width: 34px !important;
+  height: 34px !important;
+  padding: 6px !important;
+  transition: background 0.2s, border-color 0.2s !important;
+}
+[data-testid="stSidebarCollapseButton"] > button:hover,
+[data-testid="stSidebar"] button[kind="header"]:hover {
+  background: var(--accent-dim) !important;
+  border-color: var(--accent) !important;
+}
+[data-testid="stSidebarCollapseButton"] > button svg,
+[data-testid="stSidebar"] button[kind="header"] svg {
+  fill: var(--accent) !important;
+  stroke: var(--accent) !important;
+  color: var(--accent) !important;
+  opacity: 1 !important;
+}
+
+/* ══════════════════════════════════
    SIDEBAR
-════════════════════════════ */
+══════════════════════════════════ */
 [data-testid="stSidebar"] {
   background: var(--bg-surface) !important;
-  border-right: 1px solid var(--border-subtle) !important;
+  border-right: 1px solid var(--border-faint) !important;
 }
-[data-testid="stSidebar"] * { font-family: var(--font-body) !important; }
-[data-testid="stSidebar"] .stMarkdown h3 {
-  color: var(--neon-blue) !important;
+[data-testid="stSidebar"] * {
+  font-family: var(--font-body) !important;
+}
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h3 {
   font-family: var(--font-display) !important;
-  font-size: 0.85rem !important;
-  letter-spacing: 0.12em !important;
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em !important;
   text-transform: uppercase !important;
-  margin-bottom: 0.6rem !important;
+  color: var(--text-muted) !important;
+  margin-bottom: 0.5rem !important;
+  margin-top: 1.2rem !important;
+}
+[data-testid="stSidebar"] hr {
+  border-color: var(--border-faint) !important;
+  margin: 1rem 0 !important;
 }
 
-/* ════════════════════════════
+/* ══════════════════════════════════
    TEXTAREA
-════════════════════════════ */
+══════════════════════════════════ */
 textarea {
-  background: var(--bg-glass) !important;
+  background: var(--bg-raised) !important;
   border: 1px solid var(--border-subtle) !important;
-  border-radius: var(--radius-md) !important;
+  border-radius: var(--r-lg) !important;
   color: var(--text-primary) !important;
   font-family: var(--font-body) !important;
-  font-size: 0.97rem !important;
-  line-height: 1.7 !important;
+  font-size: 0.96rem !important;
+  line-height: 1.75 !important;
   padding: 1.1rem 1.3rem !important;
-  transition: border-color 0.25s, box-shadow 0.25s !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
   resize: vertical !important;
+  caret-color: var(--accent) !important;
 }
 textarea:focus {
-  border-color: var(--neon-blue) !important;
-  box-shadow: 0 0 0 3px rgba(99,179,237,0.12), var(--shadow-glow-blue) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-dim), var(--shadow-accent) !important;
   outline: none !important;
+  background: var(--bg-overlay) !important;
 }
-textarea::placeholder { color: var(--text-muted) !important; }
-
-/* Label above textarea */
+textarea::placeholder {
+  color: var(--text-muted) !important;
+  font-style: italic;
+}
 [data-testid="stTextArea"] label {
-  color: var(--text-secondary) !important;
-  font-size: 0.82rem !important;
-  letter-spacing: 0.08em !important;
-  text-transform: uppercase !important;
+  display: none !important;
 }
 
-/* ════════════════════════════
-   BUTTONS
-════════════════════════════ */
+/* ══════════════════════════════════
+   BUTTONS — Primary
+══════════════════════════════════ */
 .stButton > button {
   width: 100% !important;
-  background: var(--grad-primary) !important;
+  background: var(--accent) !important;
   border: none !important;
-  border-radius: var(--radius-md) !important;
-  color: #fff !important;
-  font-family: var(--font-body) !important;
-  font-size: 1rem !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.04em !important;
+  border-radius: var(--r-md) !important;
+  color: #050a14 !important;
+  font-family: var(--font-display) !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
   padding: 0.85rem 1.5rem !important;
   cursor: pointer !important;
-  transition: transform 0.2s, box-shadow 0.2s, filter 0.2s !important;
-  box-shadow: 0 4px 24px rgba(99,179,237,0.3), 0 2px 8px rgba(183,148,244,0.2) !important;
+  transition: transform 0.18s, box-shadow 0.18s, filter 0.18s !important;
+  box-shadow: 0 2px 12px var(--accent-glow), 0 1px 3px rgba(0,0,0,0.4) !important;
 }
 .stButton > button:hover {
-  transform: translateY(-2px) scale(1.012) !important;
-  filter: brightness(1.12) !important;
-  box-shadow: 0 8px 36px rgba(99,179,237,0.45), 0 4px 16px rgba(183,148,244,0.3) !important;
+  filter: brightness(1.08) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 28px rgba(56,189,248,0.35), 0 2px 8px rgba(0,0,0,0.4) !important;
 }
 .stButton > button:active {
-  transform: translateY(0) scale(0.99) !important;
+  transform: translateY(0) !important;
+  filter: brightness(0.96) !important;
 }
 
-/* ════════════════════════════
+/* Download button — ghost style */
+[data-testid="stDownloadButton"] > button {
+  background: transparent !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--r-md) !important;
+  color: var(--text-secondary) !important;
+  font-family: var(--font-body) !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  padding: 0.75rem 1.5rem !important;
+  cursor: pointer !important;
+  transition: border-color 0.2s, color 0.2s, background 0.2s !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+[data-testid="stDownloadButton"] > button:hover {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+  background: var(--accent-dim) !important;
+  transform: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* ══════════════════════════════════
    PROGRESS BAR
-════════════════════════════ */
-.stProgress > div > div {
-  background: var(--grad-primary) !important;
-  border-radius: 99px !important;
-}
+══════════════════════════════════ */
 .stProgress > div {
-  background: var(--bg-glass) !important;
+  background: var(--bg-overlay) !important;
   border-radius: 99px !important;
-  height: 5px !important;
+  height: 3px !important;
+  border: none !important;
+}
+.stProgress > div > div {
+  background: var(--accent) !important;
+  border-radius: 99px !important;
+  box-shadow: 0 0 8px var(--accent-glow) !important;
 }
 
-/* ════════════════════════════
+/* ══════════════════════════════════
    SPINNER
-════════════════════════════ */
+══════════════════════════════════ */
 .stSpinner > div {
-  border-top-color: var(--neon-blue) !important;
+  border-top-color: var(--accent) !important;
+  border-right-color: transparent !important;
 }
 
-/* ════════════════════════════
-   SELECT / SLIDER
-════════════════════════════ */
-.stSlider [data-baseweb="slider"] [role="slider"] {
-  background: var(--neon-blue) !important;
+/* ══════════════════════════════════
+   SLIDER
+══════════════════════════════════ */
+.stSlider [role="slider"] {
+  background: var(--accent) !important;
+  border: 2px solid var(--bg-base) !important;
+  box-shadow: 0 0 0 3px var(--accent-dim) !important;
+}
+.stSlider [data-testid="stSliderTrack"] > div {
+  background: var(--accent) !important;
 }
 
-/* ════════════════════════════
+/* ══════════════════════════════════
    ANIMATIONS
-════════════════════════════ */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
+══════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes gradientShift {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-@keyframes pulse-ring {
-  0%   { box-shadow: 0 0 0 0 rgba(99,179,237,0.4); }
-  70%  { box-shadow: 0 0 0 14px rgba(99,179,237,0); }
-  100% { box-shadow: 0 0 0 0 rgba(99,179,237,0); }
-}
 @keyframes shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position:  200% center; }
+  0%   { background-position: -300% center; }
+  100% { background-position:  300% center; }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-/* ════════════════════════════
+/* ══════════════════════════════════
    COMPONENT CLASSES
-════════════════════════════ */
+══════════════════════════════════ */
 
-/* ── Header ── */
-.ss-header {
+/* ── Topbar ── */
+.ss-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.4rem 0 1rem;
-  animation: fadeInUp 0.55s ease both;
+  padding: 0.5rem 0 1.4rem;
+  animation: fadeUp 0.5s ease both;
 }
 .ss-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.ss-logo-mark {
+  width: 32px;
+  height: 32px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-display);
-  font-size: 1.35rem;
   font-weight: 800;
-  background: var(--grad-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 0.8rem;
+  color: #050a14;
+  letter-spacing: -0.03em;
+  flex-shrink: 0;
+}
+.ss-logo-text {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
   letter-spacing: -0.02em;
-  cursor: default;
 }
-.ss-logo span {
-  display: inline-block;
-  animation: pulse-ring 2.8s cubic-bezier(0.455,0.03,0.515,0.955) infinite;
-  border-radius: 6px;
-  padding: 2px 8px;
-  border: 1px solid rgba(99,179,237,0.3);
+.ss-logo-text span {
+  color: var(--accent);
 }
-.ss-header-title {
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  letter-spacing: 0.01em;
+.ss-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
-.ss-tagline {
+.ss-version-tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  background: var(--bg-raised);
+  border: 1px solid var(--border-faint);
+  border-radius: 99px;
+  padding: 0.2rem 0.65rem;
+  letter-spacing: 0.05em;
+}
+.ss-status-dot {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.72rem;
   color: var(--text-muted);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-align: right;
+  letter-spacing: 0.04em;
 }
-.ss-tagline span {
-  color: var(--neon-blue);
+.ss-status-dot::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 6px var(--success);
+  animation: pulse 2.5s ease-in-out infinite;
+  flex-shrink: 0;
 }
 
-/* ── Divider ── */
-.ss-divider {
+/* ── Rule ── */
+.ss-rule {
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--neon-blue), var(--neon-purple), transparent);
-  opacity: 0.5;
-  margin: 0.2rem 0 1.8rem;
-  animation: fadeInUp 0.6s 0.1s ease both;
+  background: var(--border-faint);
+  margin: 0 0 2.5rem;
+  animation: fadeUp 0.5s 0.05s ease both;
 }
 
 /* ── Hero ── */
 .ss-hero {
-  text-align: center;
-  padding: 1.2rem 0 2.2rem;
-  animation: fadeInUp 0.6s 0.15s ease both;
+  padding: 0.5rem 0 2.8rem;
+  animation: fadeUp 0.55s 0.08s ease both;
+}
+.ss-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--accent-dim);
+  border: 1px solid var(--border-accent);
+  border-radius: 99px;
+  padding: 0.25rem 0.75rem;
+  margin-bottom: 1.1rem;
+}
+.ss-hero-eyebrow::before {
+  content: '◆';
+  font-size: 0.5rem;
+  opacity: 0.7;
 }
 .ss-hero-heading {
   font-family: var(--font-display);
-  font-size: clamp(1.9rem, 4.5vw, 2.9rem);
+  font-size: clamp(2rem, 4.5vw, 3rem);
   font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
-  background: linear-gradient(135deg, #e8edf5 0%, var(--neon-blue) 40%, var(--neon-purple) 80%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmer 4s linear infinite;
-  margin-bottom: 0.9rem;
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+.ss-hero-heading em {
+  font-style: normal;
+  color: var(--accent);
 }
 .ss-hero-sub {
   color: var(--text-secondary);
-  font-size: 1.02rem;
-  line-height: 1.6;
-  max-width: 560px;
-  margin: 0 auto;
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 540px;
+  font-weight: 400;
 }
-.ss-hero-badges {
+.ss-hero-caps {
+  display: flex;
+  align-items: center;
+  gap: 1.8rem;
+  margin-top: 1.8rem;
+  flex-wrap: wrap;
+}
+.ss-cap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+.ss-cap-icon {
+  width: 22px;
+  height: 22px;
+  background: var(--bg-overlay);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
-  margin-top: 1.2rem;
-  flex-wrap: wrap;
-}
-.ss-badge {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  padding: 0.3rem 0.8rem;
-  border-radius: 99px;
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-glass);
-  color: var(--text-secondary);
-}
-.ss-badge.blue  { border-color: rgba(99,179,237,0.35); color: var(--neon-blue); }
-.ss-badge.purple{ border-color: rgba(183,148,244,0.35); color: var(--neon-purple); }
-.ss-badge.cyan  { border-color: rgba(79,209,197,0.35);  color: var(--neon-cyan); }
-
-/* ── Section label ── */
-.ss-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 0.55rem;
+  font-size: 0.7rem;
 }
 
-/* ── Counter row ── */
-.ss-counter-row {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 0.45rem;
-  font-size: 0.77rem;
-  color: var(--text-muted);
-}
-.ss-counter-row .count { color: var(--neon-blue); font-weight: 600; }
-.ss-counter-row .divider-dot { opacity: 0.3; }
-
-/* ── Output card ── */
-.ss-output-card {
-  background: var(--bg-glass);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 1.6rem 1.8rem;
-  margin-top: 0.6rem;
-  box-shadow: var(--shadow-card);
-  animation: fadeInUp 0.5s ease both;
-  position: relative;
-  overflow: hidden;
-}
-.ss-output-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--grad-subtle);
-  border-radius: inherit;
-  opacity: 0.6;
-  pointer-events: none;
-}
-.ss-output-top {
+/* ── Section header ── */
+.ss-section-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: 0.7rem;
 }
-.ss-output-title {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 700;
-  background: var(--grad-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.ss-output-actions {
+.ss-section-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
   display: flex;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.4rem;
 }
-.ss-action-btn {
+.ss-section-label::before {
+  content: '';
+  width: 3px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* ── Counter ── */
+.ss-counter {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
-  font-weight: 600;
+  color: var(--text-muted);
+}
+.ss-counter .num { color: var(--text-secondary); }
+.ss-counter .sep { opacity: 0.3; }
+.ss-counter .status-ok  { color: var(--success); }
+.ss-counter .status-warn { color: var(--warning); }
+
+/* ── Output card ── */
+.ss-output-card {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-top: 2px solid var(--accent);
+  border-radius: var(--r-xl);
+  padding: 1.8rem;
+  margin-top: 0.6rem;
+  box-shadow: var(--shadow-lg), var(--shadow-accent);
+  animation: fadeUp 0.45s ease both;
+  position: relative;
+  overflow: hidden;
+}
+.ss-output-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(to bottom, rgba(56,189,248,0.04), transparent);
+  pointer-events: none;
+  border-radius: inherit;
+}
+.ss-output-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.3rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-faint);
+}
+.ss-output-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 0.3rem 0.75rem;
-  border-radius: var(--radius-sm);
+}
+.ss-output-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 8px var(--success);
+}
+.ss-copy-btn {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--r-sm);
   border: 1px solid var(--border-subtle);
-  background: var(--bg-glass);
-  color: var(--text-secondary);
+  background: var(--bg-overlay);
+  color: var(--text-muted);
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
-.ss-action-btn:hover {
-  border-color: var(--neon-blue);
-  color: var(--neon-blue);
-  background: rgba(99,179,237,0.08);
+.ss-copy-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
 }
 .ss-summary-text {
-  color: var(--text-primary);
-  font-size: 1.03rem;
-  line-height: 1.8;
+  color: var(--text-primary) !important;
+  font-size: 1.05rem;
+  line-height: 1.85;
+  font-weight: 400;
+  letter-spacing: 0.01em;
   position: relative;
   z-index: 1;
 }
 
 /* ── Stats row ── */
 .ss-stats {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1.3rem;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+@media (max-width: 600px) {
+  .ss-stats { grid-template-columns: repeat(2, 1fr); }
 }
 .ss-stat {
-  flex: 1;
-  min-width: 120px;
-  background: var(--bg-glass);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 0.9rem 1rem;
-  text-align: center;
+  background: var(--bg-overlay);
+  border: 1px solid var(--border-faint);
+  border-radius: var(--r-lg);
+  padding: 1rem 1.1rem;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
 }
+.ss-stat:hover {
+  border-color: var(--border-subtle);
+}
+.ss-stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.ss-stat:hover::before { opacity: 1; }
 .ss-stat-value {
   font-family: var(--font-display);
-  font-size: 1.6rem;
+  font-size: 1.7rem;
   font-weight: 800;
-  background: var(--grad-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
   line-height: 1.1;
+  letter-spacing: -0.03em;
 }
 .ss-stat-label {
-  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
   color: var(--text-muted);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  margin-top: 0.3rem;
+  margin-top: 0.35rem;
 }
+.ss-stat.accent .ss-stat-value { color: var(--accent); }
 
 /* ── Warning / Error ── */
 .ss-warning {
-  background: rgba(245,101,101,0.08);
-  border: 1px solid rgba(245,101,101,0.3);
-  border-radius: var(--radius-md);
-  padding: 0.85rem 1.1rem;
-  color: #fc8181;
+  background: var(--error-dim);
+  border: 1px solid rgba(248,113,113,0.25);
+  border-left: 3px solid var(--error);
+  border-radius: var(--r-md);
+  padding: 0.9rem 1.1rem;
+  color: #fca5a5;
   font-size: 0.9rem;
   display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  animation: fadeInUp 0.3s ease;
+  align-items: flex-start;
+  gap: 0.7rem;
+  animation: fadeUp 0.3s ease;
+  line-height: 1.6;
 }
 
 /* ── Loading card ── */
 .ss-loading {
-  background: var(--bg-glass);
+  background: var(--bg-raised);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 2rem;
+  border-radius: var(--r-xl);
+  padding: 2.5rem;
   text-align: center;
-  animation: fadeInUp 0.4s ease;
+  animation: fadeUp 0.35s ease;
+}
+.ss-loading-spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border-subtle);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1.1rem;
 }
 .ss-loading-title {
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
-  background: var(--grad-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 0.4rem;
+  color: var(--text-primary);
+  margin-bottom: 0.35rem;
 }
-.ss-loading-sub { color: var(--text-muted); font-size: 0.85rem; }
+.ss-loading-sub {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
 
 /* ── Footer ── */
 .ss-footer {
   text-align: center;
-  margin-top: 4rem;
+  margin-top: 5rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--border-faint);
+  color: var(--text-disabled);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  animation: fadeUp 0.5s 0.3s ease both;
+}
+.ss-footer span { color: var(--text-muted); }
+.ss-footer a {
   color: var(--text-muted);
-  font-size: 0.8rem;
-  letter-spacing: 0.04em;
-  animation: fadeInUp 0.6s 0.3s ease both;
+  text-decoration: none;
+  border-bottom: 1px solid var(--border-faint);
+  transition: color 0.2s, border-color 0.2s;
 }
-.ss-footer span { color: var(--neon-blue); }
+.ss-footer a:hover { color: var(--accent); border-color: var(--accent); }
 
-/* ── Sidebar styles ── */
-.ss-sidebar-logo {
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 800;
-  background: var(--grad-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 0.3rem;
-}
-.ss-sidebar-section {
-  background: var(--bg-glass);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 0.9rem 1rem;
-  margin-bottom: 0.8rem;
-  font-size: 0.87rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-.ss-sidebar-section strong { color: var(--text-primary); }
-.ss-chip {
-  display: inline-block;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  padding: 0.2rem 0.6rem;
-  border-radius: 99px;
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-glass);
-  color: var(--neon-purple);
-  margin: 0.15rem 0.15rem 0.15rem 0;
-}
-.ss-gh-link {
+/* ── Sidebar components ── */
+.ss-sb-logo {
   display: flex;
   align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0 1.2rem;
+}
+.ss-sb-mark {
+  width: 30px; height: 30px;
+  background: var(--accent);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.75rem;
+  color: #050a14;
+  flex-shrink: 0;
+}
+.ss-sb-name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.ss-sb-ver {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  margin-top: 0.1rem;
+}
+.ss-sb-card {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-faint);
+  border-radius: var(--r-md);
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.65rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+.ss-sb-card strong { color: var(--text-primary); font-weight: 600; }
+.ss-sb-card code {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  background: var(--bg-overlay);
+  border: 1px solid var(--border-faint);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  color: var(--accent);
+}
+.ss-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border-radius: 99px;
+  border: 1px solid var(--border-faint);
+  background: var(--bg-overlay);
+  color: var(--text-muted);
+  margin: 0.15rem 0.12rem 0 0;
+}
+.ss-gh-btn {
+  display: inline-flex;
+  align-items: center;
   gap: 0.5rem;
-  background: var(--grad-primary);
-  border-radius: var(--radius-sm);
+  background: var(--accent);
+  border-radius: var(--r-sm);
   padding: 0.5rem 0.9rem;
-  color: #fff !important;
-  font-size: 0.82rem;
+  color: #050a14 !important;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
   font-weight: 600;
   text-decoration: none !important;
-  width: fit-content;
+  transition: filter 0.18s, transform 0.18s;
   margin-top: 0.5rem;
-  transition: filter 0.2s, transform 0.2s;
+  box-shadow: 0 2px 10px var(--accent-glow);
 }
-.ss-gh-link:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.ss-gh-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
-/* Override Streamlit success/info/warning boxes */
+/* Hide Streamlit default alerts */
 .stAlert { display: none !important; }
+
+/* Hide keyboard shortcut hints */
+kbd, [aria-label*="keyboard"] { display: none !important; }
 </style>
 """
 
@@ -554,55 +819,71 @@ st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 # ══════════════════════════════════════════════════════
 with st.sidebar:
     st.markdown("""
-    <div class="ss-sidebar-logo">S.S_AI</div>
-    <div style="font-size:0.72rem;color:#4a5568;letter-spacing:0.1em;
-                text-transform:uppercase;margin-bottom:1.2rem;">
-        Summarizer · v2.0
+    <div class="ss-sb-logo">
+      <div class="ss-sb-mark">SS</div>
+      <div>
+        <div class="ss-sb-name">S.S_AI</div>
+        <div class="ss-sb-ver">Summarizer · v2.0</div>
+      </div>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### 📋 About")
+    st.markdown("### About")
     st.markdown("""
-    <div class="ss-sidebar-section">
+    <div class="ss-sb-card">
         <strong>S.S_AI Summarizer</strong> condenses long-form text into precise,
-        AI-generated summaries using fine-tuned Transformer models (T5 / BART).
+        AI-generated summaries using fine-tuned Transformer models.
+        Runs entirely on your local machine.
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### 👨‍💻 Developer")
+    st.markdown("### Developer")
     st.markdown("""
-    <div class="ss-sidebar-section">
+    <div class="ss-sb-card">
         <strong>S.S</strong><br>
         AI/ML Engineer · NLP Specialist<br>
-        <span style="color:#4a5568;font-size:0.78rem;">Building intelligent language systems.</span>
+        <span style="color:#4c5668;font-size:0.78rem;">
+            Building intelligent language systems.
+        </span>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### 🔧 Tech Stack")
+    st.markdown("### Model")
     st.markdown("""
-    <div class="ss-sidebar-section">
-        <span class="ss-chip">🤗 HuggingFace</span>
-        <span class="ss-chip">⚡ PyTorch</span>
-        <span class="ss-chip">🧠 T5 / BART</span>
-        <span class="ss-chip">🎈 Streamlit</span>
-        <span class="ss-chip">🐍 Python 3.10+</span>
+    <div class="ss-sb-card">
+        Architecture: <code>T5 / BART</code><br>
+        Decoding: <code>Beam Search (n=4)</code><br>
+        Max Input: <code>512 tokens</code><br>
+        Max Output: <code>120 tokens</code>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### 🔗 Links")
+    st.markdown("### Tech Stack")
     st.markdown("""
-    <div class="ss-sidebar-section">
-        <a class="ss-gh-link" href="https://github.com" target="_blank">
-            ⭐ View on GitHub
+    <div class="ss-sb-card">
+        <span class="ss-tag">🤗 HuggingFace</span>
+        <span class="ss-tag">⚡ PyTorch</span>
+        <span class="ss-tag">🧠 T5 / BART</span>
+        <span class="ss-tag">🎈 Streamlit</span>
+        <span class="ss-tag">🐍 Python 3.10+</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("### Links")
+    st.markdown("""
+    <div class="ss-sb-card">
+        <a class="ss-gh-btn" href="https://github.com" target="_blank">
+            ★ View on GitHub
         </a>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("---")
     st.markdown("""
-    <div style="font-size:0.7rem;color:#2d3748;text-align:center;line-height:1.8;">
-        Model runs locally on your machine.<br>
-        GPU accelerated when CUDA is available.
+    <div style="font-family:'DM Mono',monospace;font-size:0.66rem;
+                color:#2e3647;text-align:center;line-height:2;letter-spacing:0.05em;">
+        MODEL RUNS LOCALLY<br>
+        CUDA ACCELERATED WHEN AVAILABLE
     </div>
     """, unsafe_allow_html=True)
 
@@ -613,7 +894,7 @@ with st.sidebar:
 @st.cache_resource(show_spinner=False)
 def load_model():
     """Load tokenizer + model once and cache them across sessions."""
-    model_path = "G:/My Drive/my_summarizer"   # ← Update this path
+    model_path = "facebook/bart-large-cnn"   # ← Update this path
 
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     model     = AutoModelForSeq2SeqLM.from_pretrained(model_path)
@@ -624,15 +905,20 @@ def load_model():
 
 
 # ══════════════════════════════════════════════════════
-# 5. HEADER
+# 5. TOPBAR
 # ══════════════════════════════════════════════════════
 st.markdown("""
-<div class="ss-header">
-  <div class="ss-logo"><span>S.S_AI</span></div>
-  <div class="ss-header-title">AI Text Summarizer</div>
-  <div class="ss-tagline">Powered by <span>Transformer Intelligence</span></div>
+<div class="ss-topbar">
+  <div class="ss-logo">
+    <div class="ss-logo-mark">SS</div>
+    <div class="ss-logo-text">S.S<span>_AI</span></div>
+  </div>
+  <div class="ss-topbar-right">
+    <div class="ss-status-dot">System Ready</div>
+    <div class="ss-version-tag">v2.0</div>
+  </div>
 </div>
-<div class="ss-divider"></div>
+<div class="ss-rule"></div>
 """, unsafe_allow_html=True)
 
 
@@ -641,15 +927,28 @@ st.markdown("""
 # ══════════════════════════════════════════════════════
 st.markdown("""
 <div class="ss-hero">
-  <div class="ss-hero-heading">Transform Long Text<br>into Smart Summaries</div>
-  <div class="ss-hero-sub">
-    Leverage fine-tuned Transformer intelligence to instantly condense articles,
-    research papers, and documents into clear, accurate summaries.
+  <div class="ss-hero-eyebrow">Transformer Intelligence</div>
+  <div class="ss-hero-heading">
+    Transform Long Text<br>into <em>Smart Summaries</em>
   </div>
-  <div class="ss-hero-badges">
-    <span class="ss-badge blue">⚡ GPU Accelerated</span>
-    <span class="ss-badge purple">🧠 Transformer Model</span>
-    <span class="ss-badge cyan">✨ Beam Search Decoding</span>
+  <div class="ss-hero-sub">
+    Fine-tuned Transformer models instantly condense articles,
+    research papers, and documents into clear, accurate summaries —
+    running entirely on your machine.
+  </div>
+  <div class="ss-hero-caps">
+    <div class="ss-cap">
+      <div class="ss-cap-icon">⚡</div>
+      GPU Accelerated
+    </div>
+    <div class="ss-cap">
+      <div class="ss-cap-icon">🧠</div>
+      Beam Search Decoding
+    </div>
+    <div class="ss-cap">
+      <div class="ss-cap-icon">🔒</div>
+      Fully Local · No API
+    </div>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -658,39 +957,42 @@ st.markdown("""
 # ══════════════════════════════════════════════════════
 # 7. INPUT SECTION
 # ══════════════════════════════════════════════════════
-st.markdown('<div class="ss-label">📝 Input Text</div>', unsafe_allow_html=True)
+# Character & word count (computed before render)
+input_val   = st.session_state.get("input_text", "")
+char_count  = len(input_val)
+word_count_in = len(input_val.split()) if input_val.strip() else 0
+limit       = 2000
+
+status_cls  = "status-ok"  if char_count <= limit else "status-warn"
+status_txt  = "Good length" if char_count <= limit else "Will be truncated"
+
+st.markdown(f"""
+<div class="ss-section-head">
+  <div class="ss-section-label">Input Text</div>
+  <div class="ss-counter">
+    <span><span class="num">{word_count_in:,}</span> words</span>
+    <span class="sep">·</span>
+    <span><span class="num">{char_count:,}</span> chars</span>
+    <span class="sep">·</span>
+    <span class="{status_cls}">{status_txt}</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
 text = st.text_area(
     label="Input Text",
-    height=220,
-    placeholder="Paste your long text here — articles, reports, research papers…",
+    height=230,
+    placeholder="Paste your article, report, or research paper here…",
     label_visibility="collapsed",
     key="input_text",
 )
 
-# Character & word counter
-char_count = len(text)
-word_count_in = len(text.split()) if text.strip() else 0
-limit        = 2000  # soft display limit (model truncates at 512 tokens)
-
-st.markdown(f"""
-<div class="ss-counter-row">
-  <span><span class="count">{word_count_in:,}</span> words</span>
-  <span class="divider-dot">•</span>
-  <span><span class="count">{char_count:,}</span> characters</span>
-  <span class="divider-dot">•</span>
-  <span style="color:{'#68d391' if char_count <= limit else '#fc8181'}">
-    {'✓ Good length' if char_count <= limit else '⚠ Very long — will be truncated to 512 tokens'}
-  </span>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("<div style='height:1.2rem'></div>", unsafe_allow_html=True)
 
 # ── Generate button ──
 col_btn, _ = st.columns([1, 0.001])
 with col_btn:
-    generate = st.button("✨ Generate Summary", use_container_width=True)
+    generate = st.button("Generate Summary →", use_container_width=True)
 
 
 # ══════════════════════════════════════════════════════
@@ -702,38 +1004,38 @@ if generate:
     if not text.strip():
         st.markdown("""
         <div class="ss-warning">
-          ⚠️ <strong>Empty input.</strong> Please paste some text before generating.
+          ⚠ <span><strong>Empty input.</strong>
+          Please paste some text before generating a summary.</span>
         </div>
         """, unsafe_allow_html=True)
         st.stop()
 
-    # ── Load model (with graceful error) ──
+    # ── Load model ──
     try:
         tokenizer, model, device = load_model()
     except Exception as e:
         st.markdown(f"""
         <div class="ss-warning">
-          ⚠️ <strong>Model failed to load.</strong>
-          Check your <code>model_path</code> in the code.<br>
-          <small style="opacity:0.6">{e}</small>
+          ⚠ <span><strong>Model failed to load.</strong>
+          Check your <code>model_path</code> in the source code.<br>
+          <small style="opacity:0.55">{e}</small></span>
         </div>
         """, unsafe_allow_html=True)
         st.stop()
 
     # ── Loading UI ──
-    loading_placeholder = st.empty()
-    progress_placeholder = st.empty()
+    loading_ph  = st.empty()
+    progress_ph = st.empty()
 
-    loading_placeholder.markdown("""
+    loading_ph.markdown("""
     <div class="ss-loading">
-      <div class="ss-loading-title">🧠 AI is thinking…</div>
-      <div class="ss-loading-sub">Running beam search decoding on your text</div>
+      <div class="ss-loading-spinner"></div>
+      <div class="ss-loading-title">Processing your text</div>
+      <div class="ss-loading-sub">Running beam search decoding…</div>
     </div>
     """, unsafe_allow_html=True)
 
-    progress_bar = progress_placeholder.progress(0)
-
-    # Animate progress bar while model runs
+    progress_bar = progress_ph.progress(0)
     for pct in range(0, 72, 6):
         time.sleep(0.04)
         progress_bar.progress(pct)
@@ -758,46 +1060,48 @@ if generate:
         summary = tokenizer.decode(output[0], skip_special_tokens=True)
 
     except Exception as e:
-        loading_placeholder.empty()
-        progress_placeholder.empty()
+        loading_ph.empty()
+        progress_ph.empty()
         st.markdown(f"""
         <div class="ss-warning">
-          ⚠️ <strong>Inference error:</strong> {e}
+          ⚠ <span><strong>Inference error:</strong> {e}</span>
         </div>
         """, unsafe_allow_html=True)
         st.stop()
 
-    # Finish progress bar
+    # Finish progress
     for pct in range(72, 101, 4):
         time.sleep(0.025)
         progress_bar.progress(pct)
+    time.sleep(0.12)
+    loading_ph.empty()
+    progress_ph.empty()
 
-    time.sleep(0.15)
-    loading_placeholder.empty()
-    progress_placeholder.empty()
-
-    # ── Output card ──
+    # ── Stats ──
     word_count_out = len(summary.split())
     compression    = round((1 - word_count_out / max(word_count_in, 1)) * 100)
+    device_lbl     = "GPU" if device == "cuda" else "CPU"
 
+    # ── Output card ──
     st.markdown(f"""
     <div class="ss-output-card">
-      <div class="ss-output-top">
-        <div class="ss-output-title">📌 AI Summary</div>
-        <div class="ss-output-actions">
-          <button class="ss-action-btn"
-            onclick="navigator.clipboard.writeText('{summary.replace("'", "&#39;")}');
-                     this.textContent='✓ Copied!';
-                     setTimeout(()=>this.textContent='📋 Copy',1500);">
-            📋 Copy
-          </button>
+      <div class="ss-output-head">
+        <div class="ss-output-label">
+          <div class="ss-output-dot"></div>
+          Summary Output
         </div>
+        <button class="ss-copy-btn"
+          onclick="navigator.clipboard.writeText('{summary.replace("'","&#39;").replace(chr(10)," ")}');
+                   this.textContent='✓ Copied';
+                   setTimeout(()=>this.textContent='Copy',1600);">
+          Copy
+        </button>
       </div>
       <div class="ss-summary-text">{summary}</div>
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Stats ──
+    # ── Stat cards ──
     st.markdown(f"""
     <div class="ss-stats">
       <div class="ss-stat">
@@ -808,35 +1112,26 @@ if generate:
         <div class="ss-stat-value">{word_count_out:,}</div>
         <div class="ss-stat-label">Summary Words</div>
       </div>
-      <div class="ss-stat">
+      <div class="ss-stat accent">
         <div class="ss-stat-value">{compression}%</div>
         <div class="ss-stat-label">Compression</div>
       </div>
       <div class="ss-stat">
-        <div class="ss-stat-value">{"GPU" if device == "cuda" else "CPU"}</div>
+        <div class="ss-stat-value">{device_lbl}</div>
         <div class="ss-stat-label">Device Used</div>
       </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Download button ──
-    st.markdown("<br>", unsafe_allow_html=True)
+    # ── Download ──
+    st.markdown("<div style='height:1rem'></div>", unsafe_allow_html=True)
     st.download_button(
-        label="⬇️  Download Summary (.txt)",
+        label="↓  Download Summary (.txt)",
         data=summary,
         file_name="ss_ai_summary.txt",
         mime="text/plain",
         use_container_width=True,
     )
-
-    # ── Expandable full summary ──
-    with st.expander("🔍 View Full Summary in Expanded Mode"):
-        st.markdown(f"""
-        <div style="font-size:1.05rem;line-height:1.9;color:var(--text-primary,#e8edf5);
-                    padding:0.5rem 0;">
-          {summary}
-        </div>
-        """, unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════════════
@@ -844,8 +1139,8 @@ if generate:
 # ══════════════════════════════════════════════════════
 st.markdown("""
 <div class="ss-footer">
-  Built with <span>❤️</span> using AI &nbsp;·&nbsp;
   <span>S.S_AI Summarizer</span> &nbsp;·&nbsp;
-  Transformer Intelligence
+  Built with Transformer Intelligence &nbsp;·&nbsp;
+  <a href="https://github.com" target="_blank">GitHub</a>
 </div>
 """, unsafe_allow_html=True)
